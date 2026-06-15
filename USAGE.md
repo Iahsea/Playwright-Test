@@ -121,18 +121,165 @@ Artifact được tạo trong:
 - `playwright-report/`: HTML report.
 - `test-results/`: screenshot, trace, video và thông tin lỗi.
 
-Chạy debug mode:
+### 5.1. Debug theo nhóm tag
+
+Mỗi `test.describe` được gắn tag `@smoke`, `@functional` hoặc `@account` trong tên.
+Kết hợp `--grep` với `--debug` để mở Playwright Inspector chỉ cho nhóm đó.
+Thêm `--headed` nếu chỉ muốn thấy browser mà không cần Inspector.
+
+Debug toàn bộ nhóm smoke — mở Inspector từng bước:
 
 ```powershell
-$env:PWDEBUG = "1"
-npx playwright test search.spec.ts
+npx playwright test --grep "@smoke" --debug
 ```
 
-Mở trace:
+Chạy nhóm smoke có browser hiện ra, không dừng từng bước:
+
+```powershell
+npx playwright test --grep "@smoke" --headed
+```
+
+Debug toàn bộ nhóm functional:
+
+```powershell
+npx playwright test --grep "@functional" --debug
+```
+
+```powershell
+npx playwright test --grep "@functional" --headed
+```
+
+Debug nhóm account (chạy tuần tự, bắt buộc `--workers=1`):
+
+```powershell
+npx playwright test --grep "@account" --workers=1 --debug
+```
+
+Loại trừ một nhóm khỏi lần chạy (ví dụ bỏ qua `@account`):
+
+```powershell
+npx playwright test --grep-invert "@account"
+```
+
+### 5.2. Debug theo file
+
+Mở Playwright Inspector cho một file cụ thể:
+
+```powershell
+npx playwright test tests/smoke/homepage.spec.ts --debug
+```
+
+```powershell
+npx playwright test tests/functional/search.spec.ts --debug
+```
+
+```powershell
+npx playwright test tests/functional/authentication.spec.ts --debug
+```
+
+Chạy có browser hiện ra nhưng không dừng từng bước:
+
+```powershell
+npx playwright test tests/smoke/homepage.spec.ts --headed
+```
+
+```powershell
+npx playwright test tests/functional/search.spec.ts --headed
+```
+
+Kết hợp cả hai — browser hiện ra và chạy chậm để quan sát rõ từng action:
+
+```powershell
+npx playwright test tests/functional/search.spec.ts --headed --slow-mo=800
+```
+
+Danh sách file spec có trong project:
+
+| File | Nhóm | Nội dung |
+|---|---|---|
+| `tests/smoke/homepage.spec.ts` | `@smoke` | Tải trang chủ, kiểm tra landmark |
+| `tests/smoke/navigation.spec.ts` | `@smoke` | Click nav links, kiểm tra URL |
+| `tests/functional/search.spec.ts` | `@functional` | Tìm kiếm, mở kết quả, no-result |
+| `tests/functional/article.spec.ts` | `@functional` | Mở bài viết, đọc nội dung |
+| `tests/functional/practice.spec.ts` | `@functional` | Trang practice problems |
+| `tests/functional/courses.spec.ts` | `@functional` | Trang courses |
+| `tests/functional/authentication.spec.ts` | `@functional` / `@account` | Form đăng nhập, đăng xuất, quên mật khẩu |
+
+### 5.3. Debug một test case cụ thể
+
+Truyền tên test (hoặc một phần tên) vào `--grep`.
+
+`--debug` mở Playwright Inspector, dừng ngay dòng đầu tiên và cho phép chạy
+từng bước bằng nút **Next Step** trên giao diện Inspector.
+`--headed` chỉ hiện browser, chạy liên tục không dừng — phù hợp khi muốn quan
+sát luồng mà không cần can thiệp.
+
+```powershell
+npx playwright test --grep "loads the public home page" --debug
+```
+
+```powershell
+npx playwright test --grep "finds and opens relevant content" --debug
+```
+
+```powershell
+npx playwright test --grep "finds and opens relevant content" --headed
+```
+
+```powershell
+npx playwright test --grep "handles a search term with no expected match" --debug
+```
+
+```powershell
+npx playwright test --grep "rejects malformed credentials" --debug
+```
+
+Kết hợp `--headed` và `--slow-mo` để quan sát chậm mà không cần Inspector:
+
+```powershell
+npx playwright test --grep "rejects malformed credentials" --headed --slow-mo=1000
+```
+
+### 5.4. UI Mode — debug trực quan toàn bộ hoặc từng phần
+
+UI Mode mở giao diện đồ họa với timeline, DOM snapshot, network log và video.
+Không cần `PWDEBUG`.
+
+Mở toàn bộ suite trong UI Mode:
+
+```powershell
+npx playwright test --ui
+```
+
+Lọc sẵn theo file khi mở UI Mode:
+
+```powershell
+npx playwright test tests/functional/search.spec.ts --ui
+```
+
+Lọc sẵn theo nhóm khi mở UI Mode:
+
+```powershell
+npx playwright test --grep "@smoke" --ui
+```
+
+### 5.5. Xem trace sau khi test fail
+
+Trace được bật tự động ở lần retry đầu tiên (`trace: 'on-first-retry'` trong
+`playwright.config.ts`). Để bật trace cho mọi lần chạy:
+
+```powershell
+npx playwright test --trace on tests/functional/search.spec.ts
+```
+
+Mở trace viewer:
 
 ```powershell
 npx playwright show-trace test-results/<thu-muc-test>/trace.zip
 ```
+
+Thư mục `<thu-muc-test>` có dạng `<tên-file>-<tên-test>-chromium/`, ví dụ:
+`search-spec-finds-and-opens-relevant-content-chromium/`.
 
 ## 6. Kết quả mong đợi
 

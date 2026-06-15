@@ -18,13 +18,9 @@ test.describe('@account account workflows', () => {
 
     await authPage.openLogin();
     await authPage.submitLogin(email!, password!);
-    await expect(page.getByRole('button', { name: /profile|account|user/i }).first()
-      .or(page.getByText(/logout|sign out/i).first())).toBeVisible();
-
-    const accountMenu = page.getByRole('button', { name: /profile|account|user/i }).first();
-    if (await accountMenu.isVisible().catch(() => false)) await accountMenu.click();
-    await page.getByText(/logout|sign out/i).first().click();
-    await expect(page.getByText(/sign in|login/i).first()).toBeVisible();
+    await authPage.expectLoggedIn();
+    await authPage.logout();
+    await expect(page.getByRole('button', { name: /sign in|login/i }).first()).toBeVisible();
   });
 
   test('requests password recovery and stops at OTP', async ({ authPage }) => {

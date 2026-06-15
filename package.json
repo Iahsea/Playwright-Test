@@ -16,6 +16,7 @@
   "description": "Playwright smoke and functional tests for GeeksforGeeks",
   "devDependencies": {
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.3"
+    "@types/node": "^25.9.3",
+    "dotenv": "^17.4.2"
   }
 }
