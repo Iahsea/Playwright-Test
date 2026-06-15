@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : 4,
+  workers: process.env.CI ? 1 : 1,
   timeout: 45_000,
   expect: {
     timeout: 10_000,
@@ -22,6 +22,10 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
     locale: 'en-US',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    launchOptions: {
+      slowMo: 500,
+    },
   },
   projects: [
     {

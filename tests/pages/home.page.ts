@@ -11,7 +11,9 @@ export class HomePage extends BasePage {
       .or(page.locator('a[href="/"]').filter({ has: page.locator('img') }).first());
     this.searchInput = page.getByRole('searchbox').first()
       .or(page.getByPlaceholder(/search/i).first())
-      .or(page.locator('input[type="search"]').first());
+      .or(page.locator('input[type="search"]').first())
+      .or(page.locator('input[placeholder*="Learn" i]').first())
+      .or(page.locator('input[id*="search" i]').first());
   }
 
   async open(): Promise<void> {
