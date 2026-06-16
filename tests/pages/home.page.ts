@@ -47,4 +47,58 @@ export class HomePage extends BasePage {
     await this.searchInput.press('Enter');
     await this.page.waitForLoadState('domcontentloaded');
   }
+
+  /**
+   * GFG-001 — Trang không được có overflow ngang: body scrollWidth không vượt
+   * viewport, và không thanh nav nào tràn ra ngoài mép phải.
+   */
+  async expectNoLayoutOverflow(): Promise<void> {
+    const overflow = await this.page.evaluate(() => {
+      const vw = window.innerWidth;
+      const overflowingNavs = Array.from(
+        document.querySelectorAll('nav, [class*="nav" i], [class*="menu" i], [role="navigation"]'),
+      )
+        .map((el) => {
+          const rect = el.getBoundingClientRect();
+          return {
+            tag: el.tagName,
+            cls: String(el.className).slice(0, 80),
+            right: Math.round(rect.right + window.scrollX),
+          };
+        })
+        .filter((info) => info.right > vw + 2);
+      return { vw, bodyScrollWidth: document.body.scrollWidth, overflowingNavs };
+    });
+
+    expect(
+      overflow.bodyScrollWidth,
+      `BUG GFG-001: body scrollWidth ${overflow.bodyScrollWidth}px vượt viewport ${overflow.vw}px (overflow ngang)`,
+    ).toBeLessThanOrEqual(overflow.vw + 1);
+
+    expect(
+      overflow.overflowingNavs,
+      `BUG GFG-001: nav tràn ngoài viewport: ${JSON.stringify(overflow.overflowingNavs)}`,
+    ).toHaveLength(0);
+  }
+
+  /**
+   * GFG-001 — Không link điều hướng nào bị cắt ký tự đầu (mép trái < 0),
+   * ví dụ "Practice Problems" bị cắt thành "ractice Problems".
+   */
+  async expectNavLinksNotClipped(): Promise<void> {
+    const clipped = await this.page.evaluate(() =>
+      Array.from(document.querySelectorAll('nav a, [class*="nav" i] a, [class*="menu" i] a'))
+        .slice(0, 20)
+        .map((a) => ({
+          text: (a.textContent ?? '').trim().slice(0, 30),
+          left: Math.round(a.getBoundingClientRect().left),
+        }))
+        .filter((info) => info.left < -2 && info.text.length > 0),
+    );
+
+    expect(
+      clipped,
+      `BUG GFG-001: link nav bị cắt mép trái: ${JSON.stringify(clipped)}`,
+    ).toHaveLength(0);
+  }
 }

@@ -321,3 +321,7 @@ trace và accessibility tree; ưu tiên cập nhật locator trong Page Object t
 
 Không cố vượt CAPTCHA. Dừng test, ghi nhận đây là giới hạn môi trường và chạy
 lại sau khi hết rate limit hoặc xác minh thủ công.
+
+### Cách chạy test GFG-005
+
+npx playwright test -g "GFG-005" --workers=1 --headed
