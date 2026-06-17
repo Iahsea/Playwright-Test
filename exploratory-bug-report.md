@@ -89,6 +89,12 @@ WHEN:  Quét toàn bộ phần tử có thuộc tính id
 THEN:  Không có id nào xuất hiện > 1 lần
 ```
 
+### Trạng thái: ✅ ĐÃ IMPLEMENT regression test
+- Helper: `expectNoDuplicateIds()` trong `tests/pages/base.page.ts`.
+- Spec: nhóm `@bug GFG-007` trong `tests/functional/bug-regression.spec.ts` (2 test: trang chủ, trang bài viết).
+- Kết quả chạy thực tế: cả 2 trang **FAIL** — bắt được `id="comp"` ×2 và `id="script"` ×2 (đều là `DIV`) → đúng chủ đích, document bug. Test sẽ tự chuyển xanh khi GFG sửa id trùng.
+- Chạy: `npx playwright test -g "GFG-007"`
+
 ---
 
 ## GFG-008 · Ảnh thiếu thuộc tính `alt`

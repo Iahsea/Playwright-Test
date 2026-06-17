@@ -98,6 +98,19 @@ test.describe('@functional @bug GFG-005 IDE C++ báo lỗi linker thô khi code 
   });
 });
 
+test.describe('@functional @bug GFG-007 id trùng lặp trong DOM', () => {
+  test('trang chủ không có id trùng', async ({ homePage }) => {
+    await homePage.open();
+    await homePage.expectNoDuplicateIds();
+  });
+
+  test('trang bài viết không có id trùng', async ({ articlePage }) => {
+    const response = await articlePage.goto(testData.bugs.articlePath);
+    await articlePage.expectSuccessfulResponse(response);
+    await articlePage.expectNoDuplicateIds();
+  });
+});
+
 test.describe('@functional @bug GFG-008 ảnh nội dung thiếu thuộc tính alt', () => {
   test('trang /courses: mọi ảnh nội dung GFG đều có alt', async ({ coursesPage }) => {
     await coursesPage.open();

@@ -87,6 +87,37 @@ export class BasePage {
   }
 
   /**
+   * GFG-007 — Không phần tử nào được dùng `id` trùng nhau. Theo chuẩn HTML,
+   * mỗi `id` phải duy nhất trong tài liệu; trùng id khiến getElementById /
+   * querySelector('#id') chỉ trả phần tử đầu → bug ngầm, và phá vỡ liên kết
+   * label/aria theo id (accessibility).
+   */
+  async expectNoDuplicateIds(): Promise<void> {
+    const duplicates = await this.page.evaluate(() => {
+      const ids = Array.from(document.querySelectorAll('[id]'))
+        .map((el) => el.id)
+        .filter(Boolean);
+      const count: Record<string, number> = {};
+      for (const id of ids) count[id] = (count[id] || 0) + 1;
+      return Object.entries(count)
+        .filter(([, c]) => c > 1)
+        .map(([id, c]) => ({
+          id,
+          count: c,
+          tags: Array.from(document.querySelectorAll(`[id="${CSS.escape(id)}"]`)).map(
+            (el) => el.tagName,
+          ),
+        }));
+    });
+
+    expect(
+      duplicates,
+      `BUG GFG-007: ${duplicates.length} id bị trùng trong DOM (id phải duy nhất theo ` +
+        `chuẩn HTML): ${JSON.stringify(duplicates, null, 1)}`,
+    ).toHaveLength(0);
+  }
+
+  /**
    * GFG-003 — Điều hướng tới một URL slug cũ và xác nhận nó KHÔNG trả về 404.
    * URL hợp lệ phải hoặc redirect (3xx) hoặc serve nội dung trực tiếp (200).
    * Trả về thông tin chuỗi response để spec đánh giá chi tiết (301 vs 302...).
